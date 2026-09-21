@@ -18,3 +18,13 @@ node_modules
 dist
 temp
 .env
+
+
+.env
+
+request.log
+error.log
+
+dist
+
+src/public/temp/*
