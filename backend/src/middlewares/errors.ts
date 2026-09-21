@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 
-import { AppError } from "../errors/error";
+import AppError from '../errors/error';
 
-export const errorHandler = (
+const errorHandler = (
   err: Error,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) => {
   if (err instanceof AppError) {
     res.status(err.statusCode).send({
@@ -17,6 +17,8 @@ export const errorHandler = (
   }
 
   res.status(500).send({
-    message: "Внутренняя ошибка сервера",
+    message: 'Внутренняя ошибка сервера',
   });
 };
+
+export default errorHandler;

@@ -1,21 +1,22 @@
-import express from "express";
-import mongoose from "mongoose";
-import cors from "cors";
-import path from "path";
-import cookieParser from "cookie-parser";
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import path from 'path';
+import cookieParser from 'cookie-parser';
 
-import { errors } from "celebrate";
+import { errors } from 'celebrate';
 
-import { PORT, DB_ADDRESS } from "./config";
+import { PORT, DB_ADDRESS } from './config';
 
-import productRouter from "./routes/product";
-import orderRouter from "./routes/order";
-import authRouter from "./routes/auth";
-import uploadRouter from "./routes/upload";
+import productRouter from './routes/product';
+import orderRouter from './routes/order';
+import authRouter from './routes/auth';
+import uploadRouter from './routes/upload';
 
-import { errorHandler } from "./middlewares/errors";
+import errorHandler from './middlewares/errors';
+import notFoundHandler from './middlewares/not-found';
 
-import { requestLogger, errorLogger } from "./middlewares/logger";
+import { requestLogger, errorLogger } from './middlewares/logger';
 
 const app = express();
 
@@ -25,20 +26,23 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-// логирование всех запросов
+// логирование запросов
 app.use(requestLogger);
 
-// раздача статических файлов
-app.use(express.static(path.join(__dirname, "public")));
+// статические файлы
+app.use(express.static(path.join(__dirname, 'public')));
 
 // роуты
-app.use("/product", productRouter);
+app.use('/product', productRouter);
 
-app.use("/order", orderRouter);
+app.use('/order', orderRouter);
 
-app.use("/auth", authRouter);
+app.use('/auth', authRouter);
 
-app.use("/upload", uploadRouter);
+app.use('/upload', uploadRouter);
+
+// 404 для несуществующих путей
+app.use(notFoundHandler);
 
 // ошибки celebrate
 app.use(errors());
@@ -46,18 +50,20 @@ app.use(errors());
 // логирование ошибок
 app.use(errorLogger);
 
-// централизованный обработчик ошибок
+// общий обработчик ошибок
 app.use(errorHandler);
 
 mongoose
   .connect(DB_ADDRESS)
+
   .then(() => {
-    console.log("MongoDB подключена");
+    console.log('MongoDB подключена');
 
     app.listen(PORT, () => {
       console.log(`Сервер запущен на порту ${PORT}`);
     });
   })
+
   .catch((err) => {
-    console.error("Ошибка подключения MongoDB:", err);
+    console.error('Ошибка подключения MongoDB:', err);
   });

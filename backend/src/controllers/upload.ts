@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 
-export const uploadFile = (req: Request, res: Response) => {
+const uploadFile = (req: Request, res: Response) => {
   if (!req.file) {
     res.status(400).send({
-      message: "Файл не загружен",
+      message: 'Файл не загружен',
     });
 
     return;
@@ -15,3 +15,5 @@ export const uploadFile = (req: Request, res: Response) => {
     originalName: req.file.originalname,
   });
 };
+
+export default uploadFile;

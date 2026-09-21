@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from 'express';
 
 import {
   register,
@@ -6,20 +6,20 @@ import {
   refreshAccessToken,
   logout,
   getCurrentUser,
-} from "../controllers/auth";
+} from '../controllers/auth';
 
-import { auth } from "../middlewares/auth";
+import { auth } from '../middlewares/auth';
 
 const router = Router();
 
-router.post("/register", register);
+router.post('/register', register);
 
-router.post("/login", login);
+router.post('/login', login);
 
-router.get("/token", refreshAccessToken);
+router.get('/token', refreshAccessToken);
 
-router.get("/logout", logout);
+router.get('/logout', logout);
 
-router.get("/user", auth, getCurrentUser);
+router.get('/user', auth, getCurrentUser);
 
 export default router;

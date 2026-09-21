@@ -1,15 +1,15 @@
-import { Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
+import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 
-import Product from "../models/product";
+import Product from '../models/product';
 
-import { BadRequestError } from "../errors/bad-request";
-import { NotFoundError } from "../errors/not-found";
+import BadRequestError from '../errors/bad-request';
+import NotFoundError from '../errors/not-found';
 
-import { moveFile } from "../utils/file";
+import moveFile from '../utils/file';
 
 export const getProducts = (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction,
 ) => {
@@ -30,16 +30,18 @@ export const createProduct = (
   res: Response,
   next: NextFunction,
 ) => {
-  const { title, image, category, description, price } = req.body;
+  const {
+    title, image, category, description, price,
+  } = req.body;
 
   const newImage = image
     ? {
-        fileName: image.fileName.startsWith("/temp/")
-          ? moveFile(image.fileName.replace("/temp/", ""))
-          : image.fileName,
+      fileName: image.fileName.startsWith('/temp/')
+        ? moveFile(image.fileName.replace('/temp/', ''))
+        : image.fileName,
 
-        originalName: image.originalName,
-      }
+      originalName: image.originalName,
+    }
     : image;
 
   Product.create({
@@ -69,14 +71,14 @@ export const updateProduct = (
   const { productId } = req.params;
 
   if (!mongoose.isValidObjectId(productId)) {
-    next(new BadRequestError("Некорректный id товара"));
+    next(new BadRequestError('Некорректный id товара'));
 
     return;
   }
 
   if (req.body.image) {
-    req.body.image.fileName = req.body.image.fileName.startsWith("/temp/")
-      ? moveFile(req.body.image.fileName.replace("/temp/", ""))
+    req.body.image.fileName = req.body.image.fileName.startsWith('/temp/')
+      ? moveFile(req.body.image.fileName.replace('/temp/', ''))
       : req.body.image.fileName;
   }
 
@@ -93,7 +95,7 @@ export const updateProduct = (
 
     .then((product) => {
       if (!product) {
-        next(new NotFoundError("Товар не найден"));
+        next(new NotFoundError('Товар не найден'));
 
         return;
       }
@@ -112,7 +114,7 @@ export const deleteProduct = (
   const { productId } = req.params;
 
   if (!mongoose.isValidObjectId(productId)) {
-    next(new BadRequestError("Некорректный id товара"));
+    next(new BadRequestError('Некорректный id товара'));
 
     return;
   }
@@ -121,7 +123,7 @@ export const deleteProduct = (
 
     .then((product) => {
       if (!product) {
-        next(new NotFoundError("Товар не найден"));
+        next(new NotFoundError('Товар не найден'));
 
         return;
       }

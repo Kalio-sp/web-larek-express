@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document } from 'mongoose';
 
 interface IProduct extends Document {
   title: string;
@@ -14,27 +14,27 @@ interface IProduct extends Document {
 const productSchema = new Schema<IProduct>({
   title: {
     type: String,
-    required: [true, "Поле title обязательно"],
+    required: [true, 'Поле title обязательно'],
     unique: true,
-    minlength: [2, "Минимальная длина title - 2 символа"],
-    maxlength: [30, "Максимальная длина title - 30 символов"],
+    minlength: [2, 'Минимальная длина title - 2 символа'],
+    maxlength: [30, 'Максимальная длина title - 30 символов'],
   },
 
   image: {
     fileName: {
       type: String,
-      required: [true, "Поле fileName обязательно"],
+      required: [true, 'Поле fileName обязательно'],
     },
 
     originalName: {
       type: String,
-      required: [true, "Поле originalName обязательно"],
+      required: [true, 'Поле originalName обязательно'],
     },
   },
 
   category: {
     type: String,
-    required: [true, "Поле category обязательно"],
+    required: [true, 'Поле category обязательно'],
   },
 
   description: {
@@ -47,4 +47,4 @@ const productSchema = new Schema<IProduct>({
   },
 });
 
-export default model<IProduct>("product", productSchema);
+export default model<IProduct>('product', productSchema);

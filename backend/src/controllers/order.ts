@@ -1,15 +1,26 @@
-import { Request, Response, NextFunction } from "express";
-import { faker } from "@faker-js/faker";
+import { Request, Response, NextFunction } from 'express';
+import { faker } from '@faker-js/faker';
 
-import Product from "../models/product";
+import mongoose from 'mongoose';
+import Product from '../models/product';
 
-export const createOrder = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const createOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { payment, email, phone, address, total, items } = req.body;
+    const {
+      payment, email, phone, address, total, items,
+    } = req.body;
+
+    const invalidIds = items.some(
+      (id: string) => !mongoose.isValidObjectId(id),
+    );
+
+    if (invalidIds) {
+      res.status(400).send({
+        message: 'Некорректный id товара',
+      });
+
+      return;
+    }
 
     const products = await Product.find({
       _id: {
@@ -19,7 +30,7 @@ export const createOrder = async (
 
     if (products.length !== items.length) {
       res.status(400).send({
-        message: "Товар не найден",
+        message: 'Товар не найден',
       });
       return;
     }
@@ -31,21 +42,21 @@ export const createOrder = async (
 
     if (productsTotal !== total) {
       res.status(400).send({
-        message: "Неверная сумма заказа",
+        message: 'Неверная сумма заказа',
       });
       return;
     }
 
-    if (!["card", "online"].includes(payment)) {
+    if (!['card', 'online'].includes(payment)) {
       res.status(400).send({
-        message: "Неверный способ оплаты",
+        message: 'Неверный способ оплаты',
       });
       return;
     }
 
     if (!email || !phone || !address) {
       res.status(400).send({
-        message: "Заполните обязательные поля",
+        message: 'Заполните обязательные поля',
       });
       return;
     }
@@ -58,3 +69,5 @@ export const createOrder = async (
     next(err);
   }
 };
+
+export default createOrder;

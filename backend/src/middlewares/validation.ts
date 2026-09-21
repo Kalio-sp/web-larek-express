@@ -1,4 +1,6 @@
-import { celebrate, Joi } from "celebrate";
+import { celebrate, Joi } from 'celebrate';
+
+const objectId = Joi.string().hex().length(24);
 
 export const validateProduct = celebrate({
   body: Joi.object({
@@ -12,15 +14,33 @@ export const validateProduct = celebrate({
 
     category: Joi.string().required(),
 
-    description: Joi.string(),
+    description: Joi.string().allow(''),
 
     price: Joi.number().allow(null),
-  }),
+  }).unknown(false),
+});
+
+export const validateProductUpdate = celebrate({
+  body: Joi.object({
+    title: Joi.string().min(2).max(30),
+
+    image: Joi.object({
+      fileName: Joi.string().required(),
+
+      originalName: Joi.string().required(),
+    }),
+
+    category: Joi.string(),
+
+    description: Joi.string().allow(''),
+
+    price: Joi.number().allow(null),
+  }).unknown(false),
 });
 
 export const validateOrder = celebrate({
   body: Joi.object({
-    payment: Joi.string().valid("card", "online").required(),
+    payment: Joi.string().valid('card', 'online').required(),
 
     email: Joi.string().email().required(),
 
@@ -30,6 +50,6 @@ export const validateOrder = celebrate({
 
     total: Joi.number().required(),
 
-    items: Joi.array().items(Joi.string()).required(),
-  }),
+    items: Joi.array().items(objectId).min(1).required(),
+  }).unknown(false),
 });

@@ -1,14 +1,17 @@
-import { Request, Response, NextFunction } from "express";
-import bcrypt from "bcryptjs";
+import { Request, Response, NextFunction } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
-import User from "../models/user";
+import User from '../models/user';
 
-import { createToken } from "../utils/jwt";
+import createToken from '../utils/jwt';
+
+import { JWT_SECRET } from '../config';
 
 const generateTokens = (id: string) => {
-  const accessToken = createToken({ _id: id }, "10m");
+  const accessToken = createToken({ _id: id }, '10m');
 
-  const refreshToken = createToken({ _id: id }, "7d");
+  const refreshToken = createToken({ _id: id }, '7d');
 
   return {
     accessToken,
@@ -40,12 +43,12 @@ export const register = async (
 
     await user.save();
 
-    res.cookie("refreshToken", tokens.refreshToken, {
+    res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: 'lax',
       secure: false,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
+      path: '/',
     });
 
     res.status(201).send({
@@ -59,9 +62,9 @@ export const register = async (
       accessToken: tokens.accessToken,
     });
   } catch (err) {
-    if (err instanceof Error && err.message.includes("E11000")) {
+    if (err instanceof Error && err.message.includes('E11000')) {
       res.status(409).send({
-        message: "Пользователь с таким email уже существует",
+        message: 'Пользователь с таким email уже существует',
       });
 
       return;
@@ -79,11 +82,11 @@ export const login = async (
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select("+password +tokens");
+    const user = await User.findOne({ email }).select('+password +tokens');
 
     if (!user) {
       res.status(401).send({
-        message: "Неверный email или пароль",
+        message: 'Неверный email или пароль',
       });
 
       return;
@@ -93,7 +96,7 @@ export const login = async (
 
     if (!isValidPassword) {
       res.status(401).send({
-        message: "Неверный email или пароль",
+        message: 'Неверный email или пароль',
       });
 
       return;
@@ -107,12 +110,12 @@ export const login = async (
 
     await user.save();
 
-    res.cookie("refreshToken", tokens.refreshToken, {
+    res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: 'lax',
       secure: false,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
+      path: '/',
     });
 
     res.send({
@@ -130,6 +133,7 @@ export const login = async (
   }
 };
 
+// обновление accessToken через refreshToken
 export const refreshAccessToken = async (
   req: Request,
   res: Response,
@@ -140,19 +144,34 @@ export const refreshAccessToken = async (
 
     if (!refreshToken) {
       res.status(401).send({
-        message: "Нет refresh токена",
+        message: 'Нет refresh токена',
+      });
+
+      return;
+    }
+
+    let payload;
+
+    try {
+      payload = jwt.verify(refreshToken, JWT_SECRET) as {
+        _id: string;
+      };
+    } catch (err) {
+      res.status(401).send({
+        message: 'Неверный или просроченный refresh токен',
       });
 
       return;
     }
 
     const user = await User.findOne({
-      "tokens.token": refreshToken,
-    }).select("+tokens");
+      _id: payload._id,
+      'tokens.token': refreshToken,
+    }).select('+tokens');
 
     if (!user) {
       res.status(401).send({
-        message: "Неверный refresh токен",
+        message: 'Refresh токен не найден',
       });
 
       return;
@@ -168,12 +187,12 @@ export const refreshAccessToken = async (
 
     await user.save();
 
-    res.cookie("refreshToken", tokens.refreshToken, {
+    res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: 'lax',
       secure: false,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
+      path: '/',
     });
 
     res.send({
@@ -200,12 +219,12 @@ export const logout = async (
     const { refreshToken } = req.cookies;
 
     const user = await User.findOne({
-      "tokens.token": refreshToken,
-    }).select("+tokens");
+      'tokens.token': refreshToken,
+    }).select('+tokens');
 
     if (!user) {
       res.status(404).send({
-        message: "Пользователь не найден",
+        message: 'Пользователь не найден',
       });
 
       return;
@@ -215,11 +234,11 @@ export const logout = async (
 
     await user.save();
 
-    res.clearCookie("refreshToken", {
+    res.clearCookie('refreshToken', {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: 'lax',
       secure: false,
-      path: "/",
+      path: '/',
     });
 
     res.send({
@@ -230,7 +249,6 @@ export const logout = async (
   }
 };
 
-// получение текущего пользователя
 export const getCurrentUser = async (
   req: Request & {
     user?: {
@@ -245,7 +263,7 @@ export const getCurrentUser = async (
 
     if (!user) {
       res.status(404).send({
-        message: "Пользователь не найден",
+        message: 'Пользователь не найден',
       });
 
       return;

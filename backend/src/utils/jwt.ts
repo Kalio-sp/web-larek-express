@@ -1,11 +1,9 @@
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
-import { JWT_SECRET } from "../config";
+import { JWT_SECRET } from '../config';
 
-export const createToken = (payload: object, expiresIn: string) => {
-  const options: SignOptions = {
-    expiresIn: expiresIn as SignOptions["expiresIn"],
-  };
+const createToken = (payload: object, expiresIn: string) => jwt.sign(payload, JWT_SECRET, {
+  expiresIn: expiresIn as jwt.SignOptions['expiresIn'],
+});
 
-  return jwt.sign(payload, JWT_SECRET, options);
-};
+export default createToken;
